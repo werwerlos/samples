@@ -1,0 +1,1222 @@
+{
+	"info": {
+		"_postman_id": "2e626b05-7cae-471a-9569-fe7e61fc2393",
+		"name": "Miniature games collection",
+		"description": "Very basic collection with just a few requests and (soon) tests.\n\nCollection run on a mocked server.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "3520605-2e626b05-7cae-471a-9569-fe7e61fc2393"
+	},
+	"item": [
+		{
+			"name": "games",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6cf51e61-4ad7-416b-a0a7-15f79a4123d3",
+						"exec": [
+							"// RESPONSE\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// BODY CONSTRUCTION\r",
+							"pm.test(\"Response body is an array\", function () {\r",
+							"    pm.expect(pm.response.json()).to.be.an('array').that.is.not.empty;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Each game object has EAN, title, category, genre, age, minimum players, maximum players, and rating properties\", function () {\r",
+							"    const games = pm.response.json();\r",
+							"    games.forEach((game) => {\r",
+							"        pm.expect(game).to.have.property('EAN');\r",
+							"        pm.expect(game).to.have.property('title');\r",
+							"        pm.expect(game).to.have.property('category');\r",
+							"        pm.expect(game).to.have.property('genre');\r",
+							"        pm.expect(game).to.have.property('age');\r",
+							"        pm.expect(game).to.have.property('minimum players');\r",
+							"        pm.expect(game).to.have.property('maximum players');\r",
+							"        pm.expect(game).to.have.property('rating');\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// AGE\r",
+							"pm.test(\"Each game object has a non-empty age\", function () {\r",
+							"    const games = pm.response.json();\r",
+							"\r",
+							"    pm.expect(games).to.be.an('array');\r",
+							"\r",
+							"    games.forEach(function(game) {\r",
+							"        pm.expect(game.age).to.exist.and.to.be.a('number').and.to.be.above(0, \"Age should be greater than zero\");\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Age is a non-negative integer\", function () {\r",
+							"    pm.response.json().forEach(function (game) {\r",
+							"        pm.expect(game.age).to.be.a('number').and.to.satisfy(function (age) {\r",
+							"            return Number.isInteger(age) && age >= 0;\r",
+							"        }, \"Age should be a non-negative integer\");\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// TITLE\r",
+							"pm.test(\"Title is a non-empty string\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseData).to.be.an('array');\r",
+							"    responseData.forEach(function (item) {\r",
+							"        pm.expect(item.title).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Title should not be empty\");\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Each game object has a unique title\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    const titles = responseData.map(game => game.title);\r",
+							"    const uniqueTitles = [...new Set(titles)];\r",
+							"    pm.expect(uniqueTitles.length).to.equal(responseData.length);\r",
+							"});\r",
+							"\r",
+							"// CATEGORY\r",
+							"pm.test(\"Category is a non-empty string\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('array');\r",
+							"    \r",
+							"    responseData.forEach(function (item) {\r",
+							"        pm.expect(item.category).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Category should not be empty\");\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Category is one of the expected values\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('array');\r",
+							"    \r",
+							"    responseData.forEach(function(game) {\r",
+							"        pm.expect(game.category).to.be.oneOf([\"board game\", \"card game\"]);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// GENRE\r",
+							"pm.test(\"Genre is a non-empty string\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('array');\r",
+							"    responseData.forEach(function(game) {\r",
+							"        pm.expect(game.genre).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Genre should not be empty\");\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Genre is one of the expected values\", function () {\r",
+							"    const expectedGenres = [\"action\", \"adventure\", \"strategy\", \"family\", \"party\"];\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('array');\r",
+							"    \r",
+							"    responseData.forEach(function (game) {\r",
+							"      pm.expect(game.genre).to.be.oneOf(expectedGenres);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// EAN\r",
+							"pm.test(\"EAN is a non-empty string\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseData).to.be.an('array');\r",
+							"    responseData.forEach(function (game) {\r",
+							"        pm.expect(game.EAN).to.exist.and.to.have.lengthOf.at.least(1, \"EAN should not be empty\");\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"EAN is in a valid format\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('array');\r",
+							"    \r",
+							"    responseData.forEach(function (game) {\r",
+							"      pm.expect(game.EAN).to.match(/^\\d{13}$/);\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Each game object has a unique EAN\", function() {\r",
+							"    const responseData = pm.response.json();\r",
+							"    const eanList = [];\r",
+							"  \r",
+							"    responseData.forEach(function(game) {\r",
+							"        pm.expect(game.EAN).to.exist.and.to.be.a('string');\r",
+							"        pm.expect(eanList).to.not.include(game.EAN);\r",
+							"        eanList.push(game.EAN);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							"// PLAYERS\r",
+							"pm.test(\"Each game object has a non-empty minimum players\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseData).to.be.an('array');\r",
+							"    responseData.forEach(function(game) {\r",
+							"        pm.expect(game[\"minimum players\"]).to.exist.and.to.be.a('number', \"minimum players should be a number\");\r",
+							"        pm.expect(game[\"minimum players\"]).to.be.at.least(1, \"Minimum players should be greater than or equal to 1\");\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Each game object has a non-empty maximum players\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"  \r",
+							"    pm.expect(responseData).to.be.an('array').and.to.have.lengthOf.at.least(1, \"Array should not be empty\");\r",
+							"    responseData.forEach(function(game) {\r",
+							"        pm.expect(game[\"maximum players\"]).to.exist.and.to.be.a('number', \"maximum players should be a number\");  \r",
+							"        pm.expect(game[\"maximum players\"]).to.exist.and.to.be.above(1, \"Maximum players should be greater than one\");\r",
+							"    });\r",
+							"});  \r",
+							"pm.test(\"Minimum players is less than or equal to maximum players\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"  \r",
+							"    pm.expect(responseData).to.be.an('array');\r",
+							"  \r",
+							"    responseData.forEach(function(game) {\r",
+							"        pm.expect(game).to.have.property('minimum players').that.is.a('number');\r",
+							"        pm.expect(game).to.have.property('maximum players').that.is.a('number');\r",
+							"        pm.expect(game['minimum players']).to.be.at.most(game['maximum players']);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							"// RATING\r",
+							"pm.test(\"Each game object has a non-empty rating\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseData).to.be.an('array');\r",
+							"\r",
+							"    responseData.forEach(function(game) {\r",
+							"        pm.expect(game.rating).to.exist.and.to.be.above(0, \"Rating should be non-empty\");\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Verify that the 'rating' property is a non-negative number\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseData).to.be.an('array');\r",
+							"\r",
+							"    responseData.forEach(function(game) {\r",
+							"        pm.expect(game.rating).to.be.a('number').and.to.be.at.least(0, \"Rating should be a non-negative number\");\r",
+							"    });\r",
+							"});\r",
+							"pm.test(\"Rating is a number between 0 and 5\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('array').that.is.not.empty;\r",
+							"    \r",
+							"    responseData.forEach(function(game) {\r",
+							"        pm.expect(game.rating).to.be.a('number').within(0, 5);\r",
+							"    });\r",
+							"}); var template = `\r",
+							"<style type=\"text/css\">\r",
+							"    .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}\r",
+							"    .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}\r",
+							"    .tftable tr {background-color:#ffffff;}\r",
+							"    .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}\r",
+							"    .tftable tr:hover {background-color:#e0ffff;}\r",
+							"</style>\r",
+							"\r",
+							"<table class=\"tftable\" border=\"1\">\r",
+							"    <tr>\r",
+							"        <th>EAN</th>\r",
+							"        <th>Title</th>\r",
+							"        <th>Category</th>\r",
+							"        <th>Genre</th>\r",
+							"        <th>Age</th>\r",
+							"        <th>Minimum Players</th>\r",
+							"        <th>Maximum Players</th>\r",
+							"        <th>Rating</th>\r",
+							"    </tr>\r",
+							"    \r",
+							"    {{#each response}}\r",
+							"        <tr>\r",
+							"            <td>{{EAN}}</td>\r",
+							"            <td>{{title}}</td>\r",
+							"            <td>{{category}}</td>\r",
+							"            <td>{{genre}}</td>\r",
+							"            <td>{{age}}</td>\r",
+							"            <td>{{minimum players}}</td>\r",
+							"            <td>{{maximum players}}</td>\r",
+							"            <td>{{rating}}</td>\r",
+							"        </tr>\r",
+							"    {{/each}}\r",
+							"</table>\r",
+							"`;\r",
+							"\r",
+							"function constructVisualizerPayload() {\r",
+							"    return { response: pm.response.json() }\r",
+							"}\r",
+							"\r",
+							"pm.visualizer.set(template, constructVisualizerPayload());"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"id": "8b8fd554-57e2-4e11-87e7-b91135dad012",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/games",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"games"
+					]
+				}
+			},
+			"response": [
+				{
+					"id": "6433251b-2236-4fc8-a38d-11bca0668652",
+					"name": "200 all games",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://9c741119-7ff6-44f4-9dfd-d79f21d93745.mock.pstmn.io/games",
+							"protocol": "https",
+							"host": [
+								"9c741119-7ff6-44f4-9dfd-d79f21d93745",
+								"mock",
+								"pstmn",
+								"io"
+							],
+							"path": [
+								"games"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Wed, 01 Nov 2023 19:55:25 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "x-srv-trace",
+							"value": "v=1;t=53b46429bd3d5e13"
+						},
+						{
+							"key": "x-srv-span",
+							"value": "v=1;s=45c0772c504a315d"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "X-RateLimit-Limit",
+							"value": "120"
+						},
+						{
+							"key": "X-RateLimit-Remaining",
+							"value": "119"
+						},
+						{
+							"key": "X-RateLimit-Reset",
+							"value": "1698864947"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk\""
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"EAN\": \"8717249196235\",\n        \"title\": \"Catan\",\n        \"category\": \"board game\",\n        \"genre\": \"strategy\",\n        \"age\": 10,\n        \"minimum players\": 3,\n        \"maximum players\": 4,\n        \"rating\": 4.83\n    },\n    {\n        \"EAN\": \"3558380083443\",\n        \"title\": \"Dixit\",\n        \"category\": \"card game\",\n        \"genre\": \"family\",\n        \"age\": 8,\n        \"minimum players\": 3,\n        \"maximum players\": 8,\n        \"rating\": 4.72\n    },\n    {\n        \"EAN\": \"3558380010500\",\n        \"title\": \"Dobble\",\n        \"category\": \"card game\",\n        \"genre\": \"family\",\n        \"age\": 6,\n        \"minimum players\": 2,\n        \"maximum players\": 8,\n        \"rating\": 4.68\n    },\n    {\n        \"EAN\": \"3558380023784\",\n        \"title\": \"Splendor\",\n        \"category\": \"card game\",\n        \"genre\": \"family\",\n        \"age\": 10,\n        \"minimum players\": 2,\n        \"maximum players\": 4,\n        \"rating\": 4.59\n    },\n    {\n        \"EAN\": \"5902650617070\",\n        \"title\": \"Nemesis: Lockdown\",\n        \"category\": \"board game\",\n        \"genre\": \"strategy\",\n        \"age\": 14,\n        \"minimum players\": 1,\n        \"maximum players\": 5,\n        \"rating\": 4.77\n    },\n    {\n        \"EAN\": \"5908445421754\",\n        \"title\": \"Azul\",\n        \"category\": \"board game\",\n        \"genre\": \"family\",\n        \"age\": 8,\n        \"minimum players\": 2,\n        \"maximum players\": 4,\n        \"rating\": 3.89\n    },\n    {\n        \"EAN\": \"0700304158420\",\n        \"title\": \"Hues and Cues\",\n        \"category\": \"board game\",\n        \"genre\": \"party\",\n        \"age\": 8,\n        \"minimum players\": 3,\n        \"maximum players\": 10,\n        \"rating\": 4.12\n    },\n    {\n        \"EAN\": \"5902560387896\",\n        \"title\": \"Too Many Bones\",\n        \"category\": \"board game\",\n        \"genre\": \"strategy\",\n        \"age\": 12,\n        \"minimum players\": 1,\n        \"maximum players\": 4,\n        \"rating\": 4\n    },\n    {\n        \"EAN\": \"9781638841654\",\n        \"title\": \"Aliens: Another Glorious Day in the Corps - Updated Edition\",\n        \"category\": \"board game\",\n        \"genre\": \"strategy\",\n        \"age\": 14,\n        \"minimum players\": 1,\n        \"maximum players\": 6,\n        \"rating\": 4.97\n    },\n    {\n        \"EAN\": \"8595558307005\",\n        \"title\": \"Carcassonne\",\n        \"category\": \"board game\",\n        \"genre\": \"strategy\",\n        \"age\": 7,\n        \"minimum players\": 2,\n        \"maximum players\": 5,\n        \"rating\": 4.66\n    },\n    {\n        \"EAN\": \"5900511012989\",\n        \"title\": \"Ego\",\n        \"category\": \"card game\",\n        \"genre\": \"party\",\n        \"age\": 15,\n        \"minimum players\": 3,\n        \"maximum players\": 6,\n        \"rating\": 4.63\n    },\n    {\n        \"EAN\": \"4005556275212\",\n        \"title\": \"Alea: Puerto Rico\",\n        \"category\": \"board game\",\n        \"genre\": \"strategy\",\n        \"age\": 10,\n        \"minimum players\": 2,\n        \"maximum players\": 5,\n        \"rating\": 4.6\n    }\n    \n]"
+				}
+			]
+		},
+		{
+			"name": "games by parameters",
+			"id": "f138ef94-6a03-4729-99ed-6060196c9880",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "in",
+							"value": "header",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "API-key",
+							"type": "string"
+						},
+						{
+							"key": "value",
+							"value": "{{validAPIkey}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/games",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"games"
+					]
+				}
+			},
+			"response": [
+				{
+					"id": "30f079ba-f8df-4845-9f42-11fa9d288b09",
+					"name": "200 party games",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://9c741119-7ff6-44f4-9dfd-d79f21d93745.mock.pstmn.io/games?genre=party",
+							"protocol": "https",
+							"host": [
+								"9c741119-7ff6-44f4-9dfd-d79f21d93745",
+								"mock",
+								"pstmn",
+								"io"
+							],
+							"path": [
+								"games"
+							],
+							"query": [
+								{
+									"key": "genre",
+									"value": "party"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Wed, 01 Nov 2023 20:03:48 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "x-srv-trace",
+							"value": "v=1;t=53b46429bd3d5e13"
+						},
+						{
+							"key": "x-srv-span",
+							"value": "v=1;s=45c0772c504a315d"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "X-RateLimit-Limit",
+							"value": "120"
+						},
+						{
+							"key": "X-RateLimit-Remaining",
+							"value": "119"
+						},
+						{
+							"key": "X-RateLimit-Reset",
+							"value": "1698864947"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk\""
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"EAN\": \"3558380083443\",\n        \"title\": \"Dixit\",\n        \"category\": \"card game\",\n        \"genre\": \"party\",\n        \"age\": 8,\n        \"minimum players\": 3,\n        \"maximum players\": 8,\n        \"rating\": 4.72\n    },\n    {\n        \"EAN\": \"3558380010500\",\n        \"title\": \"Dobble\",\n        \"category\": \"card game\",\n        \"genre\": \"party\",\n        \"age\": 6,\n        \"minimum players\": 2,\n        \"maximum players\": 8,\n        \"rating\": 4.68\n    },\n    {\n        \"EAN\": \"3558380023784\",\n        \"title\": \"Splendor\",\n        \"category\": \"card game\",\n        \"genre\": \"party\",\n        \"age\": 10,\n        \"minimum players\": 2,\n        \"maximum players\": 4,\n        \"rating\": 4.59\n    },\n    {\n        \"EAN\": \"5908445421754\",\n        \"title\": \"Azul\",\n        \"category\": \"board game\",\n        \"genre\": \"party\",\n        \"age\": 8,\n        \"minimum players\": 2,\n        \"maximum players\": 4,\n        \"rating\": 3.89\n    },\n    {\n        \"EAN\": \"0700304158420\",\n        \"title\": \"Hues and Cues\",\n        \"category\": \"board game\",\n        \"genre\": \"party\",\n        \"age\": 8,\n        \"minimum players\": 3,\n        \"maximum players\": 10,\n        \"rating\": 4.12\n    },{\n        \"EAN\": \"5900511012989\",\n        \"title\": \"Ego\",\n        \"category\": \"card game\",\n        \"genre\": \"party\",\n        \"age\": 15,\n        \"minimum players\": 3,\n        \"maximum players\": 6,\n        \"rating\": 4.63\n    }\n]"
+				},
+				{
+					"id": "9cfbf8b5-24bb-42e8-977f-ac4fd764de0c",
+					"name": "404 wrong game genre",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/games?genre=adventure",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"games"
+							],
+							"query": [
+								{
+									"key": "genre",
+									"value": "adventure"
+								}
+							]
+						}
+					},
+					"status": "Not Found",
+					"code": 404,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Wed, 01 Nov 2023 20:03:48 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "x-srv-trace",
+							"value": "v=1;t=53b46429bd3d5e13"
+						},
+						{
+							"key": "x-srv-span",
+							"value": "v=1;s=45c0772c504a315d"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "X-RateLimit-Limit",
+							"value": "120"
+						},
+						{
+							"key": "X-RateLimit-Remaining",
+							"value": "119"
+						},
+						{
+							"key": "X-RateLimit-Reset",
+							"value": "1698864947"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk\""
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
+						}
+					],
+					"cookie": [],
+					"body": "No games with this category found."
+				},
+				{
+					"id": "287c49d4-9070-4dc7-9808-37d80ca6957f",
+					"name": "200 party board games",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/games?genre={{exampleGenre}}&category={{exampleCategory}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"games"
+							],
+							"query": [
+								{
+									"key": "genre",
+									"value": "{{exampleGenre}}"
+								},
+								{
+									"key": "category",
+									"value": "{{exampleCategory}}"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Wed, 01 Nov 2023 20:03:48 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "x-srv-trace",
+							"value": "v=1;t=53b46429bd3d5e13"
+						},
+						{
+							"key": "x-srv-span",
+							"value": "v=1;s=45c0772c504a315d"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "X-RateLimit-Limit",
+							"value": "120"
+						},
+						{
+							"key": "X-RateLimit-Remaining",
+							"value": "119"
+						},
+						{
+							"key": "X-RateLimit-Reset",
+							"value": "1698864947"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk\""
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"EAN\": \"5908445421754\",\n        \"title\": \"Azul\",\n        \"category\": \"board game\",\n        \"genre\": \"party\",\n        \"age\": 8,\n        \"minimum players\": 2,\n        \"maximum players\": 4,\n        \"rating\": 3.89\n    }\n]"
+				},
+				{
+					"id": "486037c3-90b6-4935-a314-be5531ff7dfe",
+					"name": "404 games by EAN",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/games?EAN={{notExistingEAN}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"games"
+							],
+							"query": [
+								{
+									"key": "EAN",
+									"value": "{{notExistingEAN}}"
+								}
+							]
+						}
+					},
+					"status": "Not Found",
+					"code": 404,
+					"_postman_previewlanguage": "Text",
+					"header": null,
+					"cookie": [],
+					"body": "No game with this EAN exist.\r\n\r\nPlease double check provided EAN and try again. "
+				},
+				{
+					"id": "f85600cf-f5b4-489f-9725-4a43e8e039de",
+					"name": "200 games by EAN",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/games?EAN={{deleteByEAN}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"games"
+							],
+							"query": [
+								{
+									"key": "EAN",
+									"value": "{{deleteByEAN}}"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"name": "Content-Type",
+							"value": "application/json",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"EAN\": \"8717249196235\",\n    \"title\": \"Catan\",\n    \"category\": \"board game\",\n    \"genre\": \"strategy\",\n    \"age\": 10,\n    \"minimum players\": 3,\n    \"maximum players\": 4,\n    \"rating\": 4.83\n}"
+				}
+			]
+		},
+		{
+			"name": "games",
+			"id": "8175af3f-4ee1-40df-aade-c484fd4e8034",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/games",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"games"
+					]
+				}
+			},
+			"response": [
+				{
+					"id": "899763d2-30ee-468e-9193-0aa65c7035b1",
+					"name": "201 game added",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-api-key",
+								"value": "VerySafePassword123",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"EAN\": \"5902560384901\",\r\n    \"title\": \"Bitoku\",\r\n    \"category\": \"board game\",\r\n    \"genre\": \"strategy\",\r\n    \"age\": 14,\r\n    \"minimum players\": 1,\r\n    \"maximum players\": 4,\r\n    \"rating\": 5.0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://9c741119-7ff6-44f4-9dfd-d79f21d93745.mock.pstmn.io/games",
+							"protocol": "https",
+							"host": [
+								"9c741119-7ff6-44f4-9dfd-d79f21d93745",
+								"mock",
+								"pstmn",
+								"io"
+							],
+							"path": [
+								"games"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"name": "Content-Type",
+							"value": "application/json",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"EAN\": \"5902560384901\",\n    \"title\": \"Bitoku\",\n    \"category\": \"board game\",\n    \"genre\": \"strategy\",\n    \"age\": 14,\n    \"minimum players\": 1,\n    \"maximum players\": 4,\n    \"rating\": 5.0\n}"
+				},
+				{
+					"id": "ecdc30be-a37e-4a3e-b564-24fc44013425",
+					"name": "401 unauthorized",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "API-key",
+								"value": "{{invalidAPIkey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"EAN\": \"1302560384901\",\r\n    \"title\": \"Ladders\",\r\n    \"category\": \"board game\",\r\n    \"genre\": \"party\",\r\n    \"age\": 5,\r\n    \"minimum players\": 1,\r\n    \"maximum players\": 4,\r\n    \"rating\": 3.5\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/games",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"games"
+							]
+						}
+					},
+					"status": "Unauthorized",
+					"code": 401,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"name": "Content-Type",
+							"value": "application/json",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"error\": {\n        \"name\": \"AuthenticationError\",\n        \"message\": \"Invalid API Key. Every request requires a valid API Key to be sent.\"\n    }\n}"
+				},
+				{
+					"id": "f26ded57-8457-4bec-b866-52dd5f987a0a",
+					"name": "400 missing game attributes",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x-api-key",
+								"value": "{{validAPIkey}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"EAN\": \"1234567890987\",\r\n        \"title\": \"\",\r\n        \"category\": \"board game\",\r\n        \"genre\": \"strategy\",\r\n        \"age\": 10,\r\n        \"minimum players\": 3,\r\n        \"maximum players\": 4,\r\n        \"rating\": 4.83\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/games",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"games"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "text",
+					"header": [
+						{
+							"key": "Content-Type",
+							"name": "Content-Type",
+							"value": "application/json",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"body": "Check your request, look like it's missing some parametrs.\r\n\r\nHint: \r\nGame has to have proided correct EAN, title, genre, category, age, minimum and maximum players amount to be valid."
+				}
+			]
+		},
+		{
+			"name": "games",
+			"id": "acf58782-d5c5-481d-951f-6e642eb5e71f",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/games?EAN={{deleteByEAN}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"games"
+					],
+					"query": [
+						{
+							"key": "EAN",
+							"value": "{{deleteByEAN}}",
+							"type": "text"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"id": "7657fa01-aecc-45c2-a8ae-95c2a197e641",
+					"name": "200 game deleted",
+					"originalRequest": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://9c741119-7ff6-44f4-9dfd-d79f21d93745.mock.pstmn.io/games?EAN=5902560384901",
+							"protocol": "https",
+							"host": [
+								"9c741119-7ff6-44f4-9dfd-d79f21d93745",
+								"mock",
+								"pstmn",
+								"io"
+							],
+							"path": [
+								"games"
+							],
+							"query": [
+								{
+									"key": "EAN",
+									"value": "5902560384901"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "Text",
+					"header": [],
+					"cookie": [],
+					"body": "Succesfuly deleted."
+				},
+				{
+					"id": "bd1b0636-3ec0-4ded-8b68-bee831413376",
+					"name": "404 no game to delete",
+					"originalRequest": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/games?EAN={{notExistingEAN}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"games"
+							],
+							"query": [
+								{
+									"key": "EAN",
+									"value": "{{notExistingEAN}}"
+								}
+							]
+						}
+					},
+					"status": "Not Found",
+					"code": 404,
+					"_postman_previewlanguage": "html",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Fri, 03 Nov 2023 08:37:10 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "text/html; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "8"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "x-srv-trace",
+							"value": "v=1;t=e954703ac43315df"
+						},
+						{
+							"key": "x-srv-span",
+							"value": "v=1;s=452e2955b816eb67"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "X-RateLimit-Limit",
+							"value": "120"
+						},
+						{
+							"key": "X-RateLimit-Remaining",
+							"value": "118"
+						},
+						{
+							"key": "X-RateLimit-Reset",
+							"value": "1699000660"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"8-o8Z4WKhWjbMA2h02SuJje306K0Q\""
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
+						}
+					],
+					"cookie": [],
+					"body": "No game with this EAN exist.\r\n\r\nPlease double check provided EAN and try again. "
+				}
+			]
+		},
+		{
+			"name": "games/:id",
+			"id": "8d88bf25-00b4-4102-98c2-75d2d57a975a",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/games?EAN={{exampleEAN}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"games"
+					],
+					"query": [
+						{
+							"key": "EAN",
+							"value": "{{exampleEAN}}"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"id": "0331b45b-c9cc-40cc-94ce-f48b4b34897e",
+					"name": "Default",
+					"originalRequest": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"rating\": 5.0\r\n}"
+						},
+						"url": {
+							"raw": "https://9c741119-7ff6-44f4-9dfd-d79f21d93745.mock.pstmn.io/games?EAN=8717249196235",
+							"protocol": "https",
+							"host": [
+								"9c741119-7ff6-44f4-9dfd-d79f21d93745",
+								"mock",
+								"pstmn",
+								"io"
+							],
+							"path": [
+								"games"
+							],
+							"query": [
+								{
+									"key": "EAN",
+									"value": "8717249196235",
+									"type": "text"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"name": "Content-Type",
+							"value": "application/json",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"EAN\": \"8717249196235\",\n        \"title\": \"Catan\",\n        \"category\": \"board game\",\n        \"genre\": \"strategy\",\n        \"age\": 10,\n        \"minimum players\": 3,\n        \"maximum players\": 4,\n        \"rating\": 5.0\n    }\n]"
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "0d65a1cd-39b7-4a48-a388-0cd298c3d146",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "3605084e-38c1-462b-809f-252a7f3fc608",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "4db43624-22c7-4ebc-a58d-c4c4d277b3d0",
+			"key": "url",
+			"value": "https://9c741119-7ff6-44f4-9dfd-d79f21d93745.mock.pstmn.io"
+		},
+		{
+			"id": "6707fb7f-0bb2-4d02-85af-ea34bc7717a0",
+			"key": "validAPIkey",
+			"value": "VerySafePassword123"
+		},
+		{
+			"id": "edd5566e-8770-42d0-98be-ac2d7f8b5260",
+			"key": "invalidAPIkey",
+			"value": "invalid API key"
+		},
+		{
+			"id": "e5a2511a-fe28-471d-91a1-bd28e7eecd80",
+			"key": "notExistingEAN",
+			"value": "1234567890123"
+		},
+		{
+			"id": "c5a10f4f-929d-4e10-bd75-a0503b03f903",
+			"key": "deleteByEAN",
+			"value": "5902560384901"
+		},
+		{
+			"id": "f59784f6-e947-4a93-921a-3a2a6815c3a9",
+			"key": "exampleEAN",
+			"value": "8717249196235"
+		},
+		{
+			"id": "1b1ac75d-2071-4a75-a8de-607b9fddd613",
+			"key": "exampleGenre",
+			"value": "party"
+		},
+		{
+			"id": "3dea3b61-308b-4946-b38c-09d201b2bddf",
+			"key": "exampleCategory",
+			"value": "board game"
+		},
+		{
+			"id": "3f79dc0b-b36f-45f6-b4ba-91ee0523a137",
+			"key": "notExistingGenre",
+			"value": "adventure"
+		}
+	]
+}
