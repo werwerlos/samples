@@ -1067,7 +1067,40 @@
 			]
 		},
 		{
-			"name": "games/:id",
+			"name": "games",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "d1ae1a14-e94b-4588-aed0-5ba0ce4e2647",
+						"exec": [
+							"pm.collectionVariables.set(\"ratingUpdate\", JSON.parse(request.data).rating);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "850a3b6c-19a9-48ce-af5e-9fab54c9ae99",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"rating is changed\", function() {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData[0].rating).to.be.eql(pm.collectionVariables.get(\"ratingUpdate\"));\r",
+							"});\r",
+							"\r",
+							"    // pm.expect(responseData.rating).to.eql( pm.collectionVariables.get(\"ratingUpdate\"));\r",
+							"// });\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"id": "8d88bf25-00b4-4102-98c2-75d2d57a975a",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
@@ -1077,7 +1110,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "",
+					"raw": "{\r\n    \"rating\": 5.0\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
