@@ -20,6 +20,9 @@
 							"    pm.response.to.have.status(200);\r",
 							"});\r",
 							"\r",
+							"//Saving request to be used in other methods pre-request scripts \r",
+							"pm.collectionVariables.set(\"getRequest\",pm.request);\r",
+							"\r",
 							"// BODY CONSTRUCTION\r",
 							"pm.test(\"Response body is an array\", function () {\r",
 							"    pm.expect(pm.response.json()).to.be.an('array').that.is.not.empty;\r",
@@ -27,6 +30,7 @@
 							"\r",
 							"pm.test(\"Each game object has EAN, title, category, genre, age, minimum players, maximum players, and rating properties\", function () {\r",
 							"    const games = pm.response.json();\r",
+							"\r",
 							"    games.forEach((game) => {\r",
 							"        pm.expect(game).to.have.property('EAN');\r",
 							"        pm.expect(game).to.have.property('title');\r",
@@ -202,47 +206,7 @@
 							"    responseData.forEach(function(game) {\r",
 							"        pm.expect(game.rating).to.be.a('number').within(0, 5);\r",
 							"    });\r",
-							"}); var template = `\r",
-							"<style type=\"text/css\">\r",
-							"    .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}\r",
-							"    .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}\r",
-							"    .tftable tr {background-color:#ffffff;}\r",
-							"    .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}\r",
-							"    .tftable tr:hover {background-color:#e0ffff;}\r",
-							"</style>\r",
-							"\r",
-							"<table class=\"tftable\" border=\"1\">\r",
-							"    <tr>\r",
-							"        <th>EAN</th>\r",
-							"        <th>Title</th>\r",
-							"        <th>Category</th>\r",
-							"        <th>Genre</th>\r",
-							"        <th>Age</th>\r",
-							"        <th>Minimum Players</th>\r",
-							"        <th>Maximum Players</th>\r",
-							"        <th>Rating</th>\r",
-							"    </tr>\r",
-							"    \r",
-							"    {{#each response}}\r",
-							"        <tr>\r",
-							"            <td>{{EAN}}</td>\r",
-							"            <td>{{title}}</td>\r",
-							"            <td>{{category}}</td>\r",
-							"            <td>{{genre}}</td>\r",
-							"            <td>{{age}}</td>\r",
-							"            <td>{{minimum players}}</td>\r",
-							"            <td>{{maximum players}}</td>\r",
-							"            <td>{{rating}}</td>\r",
-							"        </tr>\r",
-							"    {{/each}}\r",
-							"</table>\r",
-							"`;\r",
-							"\r",
-							"function constructVisualizerPayload() {\r",
-							"    return { response: pm.response.json() }\r",
-							"}\r",
-							"\r",
-							"pm.visualizer.set(template, constructVisualizerPayload());"
+							"}); "
 						],
 						"type": "text/javascript"
 					}
@@ -276,13 +240,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://9c741119-7ff6-44f4-9dfd-d79f21d93745.mock.pstmn.io/games",
-							"protocol": "https",
+							"raw": "{{url}}/games",
 							"host": [
-								"9c741119-7ff6-44f4-9dfd-d79f21d93745",
-								"mock",
-								"pstmn",
-								"io"
+								"{{url}}"
 							],
 							"path": [
 								"games"
@@ -916,6 +876,71 @@
 		},
 		{
 			"name": "games",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "9dc6136e-d5c2-4d34-a0f3-8049701804b4",
+						"exec": [
+							"//EAN from URL extraction, including transformation fror variable.\r",
+							"let url = (pm.variables.replaceIn(pm.request.url.toJSON())); \r",
+							"let ean = (url.query[0].value); \r",
+							"let getGamesRequest = (pm.collectionVariables.get(\"getRequest\"));\r",
+							"let allGames = [];\r",
+							"let ifExist = false;\r",
+							"let eanList = [];\r",
+							"\r",
+							"//Creating list of EANs existing in our collection\r",
+							"// let gameCollection1 = (pm.collectionVariables.get(\"allGames\"));\r",
+							"\r",
+							"let gameCollection = pm.sendRequest(getGamesRequest, (err,res) => {\r",
+							"    if(err){\r",
+							"        console.log(\"Error: \"+error);\r",
+							"    } else {\r",
+							"        allGames = res.json();\r",
+							"        allGames.forEach((game) => {\r",
+							"            if (game.EAN === ean) {\r",
+							"                ifExist = true;\r",
+							"            }\r",
+							"            let gameEan = game.EAN;\r",
+							"            eanList.push(gameEan);\r",
+							"            });\r",
+							"            //Passing status to be used in request Test\r",
+							"            pm.collectionVariables.set(\"ifExist\", ifExist);\r",
+							"    }\r",
+							"});\r",
+							"pm.collectionVariables.unset(\"res\");\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "97eb03b9-c947-4ff2-9d41-ecae4d5e95df",
+						"exec": [
+							"let existing = pm.collectionVariables.get(\"ifExist\");\r",
+							"pm.test(\"Check the proper status code, based on provided EAN\", function (){\r",
+							"switch (existing) {\r",
+							"    case (true): \r",
+							"        pm.test(\"Status code is 200\", function () {\r",
+							"            pm.response.to.have.status(200);\r",
+							"        });\r",
+							"    break;\r",
+							"    case (false):\r",
+							"        pm.test(\"Status code is 404\", function () {\r",
+							"            pm.response.to.have.status(404);\r",
+							"        });\r",
+							"    break;\r",
+							"}});\r",
+							"\r",
+							"pm.collectionVariables.unset(\"ifExist\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"id": "acf58782-d5c5-481d-951f-6e642eb5e71f",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
@@ -938,8 +963,7 @@
 					"query": [
 						{
 							"key": "EAN",
-							"value": "{{deleteByEAN}}",
-							"type": "text"
+							"value": "{{deleteByEAN}}"
 						}
 					]
 				}
@@ -1207,49 +1231,59 @@
 	],
 	"variable": [
 		{
-			"id": "4db43624-22c7-4ebc-a58d-c4c4d277b3d0",
+			"id": "eeccd4f2-5ce9-4d42-bd46-8361ac5c4253",
 			"key": "url",
 			"value": "https://9c741119-7ff6-44f4-9dfd-d79f21d93745.mock.pstmn.io"
 		},
 		{
-			"id": "6707fb7f-0bb2-4d02-85af-ea34bc7717a0",
+			"id": "5eff1471-41e7-4ec2-aa84-f1b37f1cce95",
 			"key": "validAPIkey",
 			"value": "VerySafePassword123"
 		},
 		{
-			"id": "edd5566e-8770-42d0-98be-ac2d7f8b5260",
+			"id": "897e8bca-b73c-47e3-8cad-1ccbcae68e1f",
 			"key": "invalidAPIkey",
 			"value": "invalid API key"
 		},
 		{
-			"id": "e5a2511a-fe28-471d-91a1-bd28e7eecd80",
+			"id": "aa351559-c7c9-4cbc-a613-5e6b1494a503",
 			"key": "notExistingEAN",
 			"value": "1234567890123"
 		},
 		{
-			"id": "c5a10f4f-929d-4e10-bd75-a0503b03f903",
+			"id": "ad916ae6-de78-498e-b533-7053cd1285cd",
 			"key": "deleteByEAN",
 			"value": "5902560384901"
 		},
 		{
-			"id": "f59784f6-e947-4a93-921a-3a2a6815c3a9",
+			"id": "5198e100-55ac-4f0a-98ed-4d95b805f6af",
 			"key": "exampleEAN",
 			"value": "8717249196235"
 		},
 		{
-			"id": "1b1ac75d-2071-4a75-a8de-607b9fddd613",
+			"id": "1725b1e8-62eb-416a-a42d-79128750b9d7",
 			"key": "exampleGenre",
 			"value": "party"
 		},
 		{
-			"id": "3dea3b61-308b-4946-b38c-09d201b2bddf",
+			"id": "afaf8c19-ce3f-41df-9381-4e73def2c2c1",
 			"key": "exampleCategory",
 			"value": "board game"
 		},
 		{
-			"id": "3f79dc0b-b36f-45f6-b4ba-91ee0523a137",
+			"id": "f41ef258-d8f9-4ab3-8136-17fb88173d1e",
 			"key": "notExistingGenre",
 			"value": "adventure"
+		},
+		{
+			"id": "9a915003-99f9-45ef-a110-e917a7805dce",
+			"key": "ratingUpdate",
+			"value": ""
+		},
+		{
+			"id": "bf6e5024-934c-49ed-a40a-b051551abb2b",
+			"key": "getRequest",
+			"value": ""
 		}
 	]
 }
