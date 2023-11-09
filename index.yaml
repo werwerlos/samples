@@ -1,0 +1,59 @@
+openapi: 3.0.3
+info:
+  title: Board Game Collection
+  version: 1.0.0
+  description: Mocked API to monitor personal collection of games
+paths:  
+  /games?{EAN}:
+    parameters:
+      - $ref: '#/components/parameters/EAN'    
+    get:
+      summary: Return game with given #/components/parameters/EAN
+      operationId: getEngineStatus
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  EAN:
+                    type: string
+                  rating:
+                    type: number
+              examples:
+                Success:
+                  value:
+                    coolantTemp: 92
+                    oilPressure: 4
+                    oilTemp: 80
+                    rpm: 800
+                    running: true  
+        '500':
+          $ref: '#/components/responses/500UnexpectedError'                                                                               
+components:
+  parameters:
+    EAN:
+      in: path
+      name: EAN
+      description: Required, unique 13-character identification number  
+      schema:
+        type: string
+      example: 1825673987309
+      required: true     
+  responses:
+    500UnexpectedError:
+      description: Unexpected error
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: Unexpected error occured                
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-key 
+security:
+  - ApiKeyAuth: []

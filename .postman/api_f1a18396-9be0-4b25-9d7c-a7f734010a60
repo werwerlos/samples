@@ -14,5 +14,8 @@ files[] = {"id":"3520605-2e626b05-7cae-471a-9569-fe7e61fc2393","path":"Miniature
 [config.relations.collections.metaData]
 
 [config.relations.apiDefinition]
+files[] = {"path":"index.yaml","metaData":{}}
 
 [config.relations.apiDefinition.metaData]
+type = openapi:3
+rootFiles[] = index.yaml

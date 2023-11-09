@@ -8,7 +8,7 @@
 	},
 	"item": [
 		{
-			"name": "games",
+			"name": "get all games",
 			"event": [
 				{
 					"listen": "test",
@@ -312,7 +312,7 @@
 			]
 		},
 		{
-			"name": "games by parameters",
+			"name": "get all games by parameter",
 			"id": "f138ef94-6a03-4729-99ed-6060196c9880",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
@@ -362,13 +362,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://9c741119-7ff6-44f4-9dfd-d79f21d93745.mock.pstmn.io/games?genre=party",
-							"protocol": "https",
+							"raw": "{{url}}/games?genre={{exampleGenre}}",
 							"host": [
-								"9c741119-7ff6-44f4-9dfd-d79f21d93745",
-								"mock",
-								"pstmn",
-								"io"
+								"{{url}}"
 							],
 							"path": [
 								"games"
@@ -376,7 +372,7 @@
 							"query": [
 								{
 									"key": "genre",
-									"value": "party"
+									"value": "{{exampleGenre}}"
 								}
 							]
 						}
@@ -686,7 +682,7 @@
 			]
 		},
 		{
-			"name": "games",
+			"name": "add game",
 			"id": "8175af3f-4ee1-40df-aade-c484fd4e8034",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
@@ -740,13 +736,9 @@
 							}
 						},
 						"url": {
-							"raw": "https://9c741119-7ff6-44f4-9dfd-d79f21d93745.mock.pstmn.io/games",
-							"protocol": "https",
+							"raw": "{{url}}/games",
 							"host": [
-								"9c741119-7ff6-44f4-9dfd-d79f21d93745",
-								"mock",
-								"pstmn",
-								"io"
+								"{{url}}"
 							],
 							"path": [
 								"games"
@@ -875,7 +867,7 @@
 			]
 		},
 		{
-			"name": "games",
+			"name": "delete game",
 			"event": [
 				{
 					"listen": "prerequest",
@@ -980,13 +972,9 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "https://9c741119-7ff6-44f4-9dfd-d79f21d93745.mock.pstmn.io/games?EAN=5902560384901",
-							"protocol": "https",
+							"raw": "{{url}}/games?EAN={{deleteByEAN}}",
 							"host": [
-								"9c741119-7ff6-44f4-9dfd-d79f21d93745",
-								"mock",
-								"pstmn",
-								"io"
+								"{{url}}"
 							],
 							"path": [
 								"games"
@@ -994,7 +982,7 @@
 							"query": [
 								{
 									"key": "EAN",
-									"value": "5902560384901"
+									"value": "{{deleteByEAN}}"
 								}
 							]
 						}
@@ -1091,13 +1079,14 @@
 			]
 		},
 		{
-			"name": "games",
+			"name": "update games",
 			"event": [
 				{
 					"listen": "prerequest",
 					"script": {
 						"id": "d1ae1a14-e94b-4588-aed0-5ba0ce4e2647",
 						"exec": [
+							"// Taking rating value from body and setting it to the collection variable for be used in tests.\r",
 							"pm.collectionVariables.set(\"ratingUpdate\", JSON.parse(request.data).rating);"
 						],
 						"type": "text/javascript"
@@ -1112,14 +1101,23 @@
 							"    pm.response.to.have.status(200);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"rating is changed\", function() {\r",
+							"//As this is mocked data, this test wil pass only for new rating= 5.0\r",
+							"pm.test(\"Rating is changed\", function() {\r",
 							"    const responseData = pm.response.json();\r",
 							"    pm.expect(responseData[0].rating).to.be.eql(pm.collectionVariables.get(\"ratingUpdate\"));\r",
 							"});\r",
 							"\r",
-							"    // pm.expect(responseData.rating).to.eql( pm.collectionVariables.get(\"ratingUpdate\"));\r",
-							"// });\r",
-							""
+							"// Thist test which should be applied for a real data:\r",
+							"pm.test(\"Response rating has to be number between 0 and 5\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData[0].rating).to.be.a('number').within(0, 5);\r",
+							"});\r",
+							"\r",
+							"// Instead, for mocked response, we cn check if value passed in body is whithin the given range.\r",
+							"pm.test(\"Request rating has to be number between 0 and 5\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(pm.collectionVariables.get(\"ratingUpdate\")).to.be.a('number').within(0, 5);\r",
+							"});"
 						],
 						"type": "text/javascript"
 					}
@@ -1134,7 +1132,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"rating\": 5.0\r\n}",
+					"raw": "{\r\n    \"rating\": 51.0\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1160,7 +1158,7 @@
 			"response": [
 				{
 					"id": "0331b45b-c9cc-40cc-94ce-f48b4b34897e",
-					"name": "Default",
+					"name": "200 update game rating",
 					"originalRequest": {
 						"method": "PATCH",
 						"header": [],
@@ -1169,13 +1167,9 @@
 							"raw": "{\r\n    \"rating\": 5.0\r\n}"
 						},
 						"url": {
-							"raw": "https://9c741119-7ff6-44f4-9dfd-d79f21d93745.mock.pstmn.io/games?EAN=8717249196235",
-							"protocol": "https",
+							"raw": "{{url}}/games?EAN={{exampleEAN}}",
 							"host": [
-								"9c741119-7ff6-44f4-9dfd-d79f21d93745",
-								"mock",
-								"pstmn",
-								"io"
+								"{{url}}"
 							],
 							"path": [
 								"games"
@@ -1183,8 +1177,7 @@
 							"query": [
 								{
 									"key": "EAN",
-									"value": "8717249196235",
-									"type": "text"
+									"value": "{{exampleEAN}}"
 								}
 							]
 						}
@@ -1211,7 +1204,7 @@
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "0d65a1cd-39b7-4a48-a388-0cd298c3d146",
+				"id": "75b4f650-a2ff-4ec3-9196-45415cb599d0",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -1221,7 +1214,7 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "3605084e-38c1-462b-809f-252a7f3fc608",
+				"id": "4a717349-fdcc-48a0-a2de-3f10adea353a",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -1231,58 +1224,58 @@
 	],
 	"variable": [
 		{
-			"id": "eeccd4f2-5ce9-4d42-bd46-8361ac5c4253",
+			"id": "f4bef8f4-3e2d-4d6c-bb7d-fd434c66793b",
 			"key": "url",
 			"value": "https://9c741119-7ff6-44f4-9dfd-d79f21d93745.mock.pstmn.io"
 		},
 		{
-			"id": "5eff1471-41e7-4ec2-aa84-f1b37f1cce95",
+			"id": "ad686155-5511-4c8d-8efb-4a5dedd00664",
 			"key": "validAPIkey",
 			"value": "VerySafePassword123"
 		},
 		{
-			"id": "897e8bca-b73c-47e3-8cad-1ccbcae68e1f",
+			"id": "9288e7b5-0842-4607-b532-ba940d635e98",
 			"key": "invalidAPIkey",
 			"value": "invalid API key"
 		},
 		{
-			"id": "aa351559-c7c9-4cbc-a613-5e6b1494a503",
+			"id": "66fce87a-0ab2-4eff-8763-fccbe29e6d00",
 			"key": "notExistingEAN",
 			"value": "1234567890123"
 		},
 		{
-			"id": "ad916ae6-de78-498e-b533-7053cd1285cd",
+			"id": "0e1cda48-1547-437c-8c17-ada2772e3aa5",
 			"key": "deleteByEAN",
 			"value": "5902560384901"
 		},
 		{
-			"id": "5198e100-55ac-4f0a-98ed-4d95b805f6af",
+			"id": "a646d0cb-955c-4270-96a0-051c9b446a49",
 			"key": "exampleEAN",
 			"value": "8717249196235"
 		},
 		{
-			"id": "1725b1e8-62eb-416a-a42d-79128750b9d7",
+			"id": "63385bc6-d86d-45d8-bfcb-3e73f8c029f3",
 			"key": "exampleGenre",
 			"value": "party"
 		},
 		{
-			"id": "afaf8c19-ce3f-41df-9381-4e73def2c2c1",
+			"id": "a6128a2a-a45b-46bd-830b-88de7b0dfa1a",
 			"key": "exampleCategory",
 			"value": "board game"
 		},
 		{
-			"id": "f41ef258-d8f9-4ab3-8136-17fb88173d1e",
+			"id": "71b9cd27-0b98-4eaf-b675-7865f5d7adb1",
 			"key": "notExistingGenre",
 			"value": "adventure"
 		},
 		{
-			"id": "9a915003-99f9-45ef-a110-e917a7805dce",
-			"key": "ratingUpdate",
+			"id": "c05bb870-338e-4f70-8b72-d851bf4bb1a4",
+			"key": "getRequest",
 			"value": ""
 		},
 		{
-			"id": "bf6e5024-934c-49ed-a40a-b051551abb2b",
-			"key": "getRequest",
+			"id": "5a97b8b6-8f88-4258-8f70-b1006edee542",
+			"key": "ratingUpdate",
 			"value": ""
 		}
 	]
